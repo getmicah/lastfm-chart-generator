@@ -1,6 +1,8 @@
 import { createCanvas, Image } from 'canvas';
 import fetch from 'node-fetch';
 import * as fs from 'fs';
+import { exec } from 'child_process';
+
 
 interface album {
 	name: string;
@@ -100,10 +102,19 @@ export default class Chart {
 	}
 	private download(canvas: Canvas) {
 		const buf = canvas.toBuffer();
-		fs.writeFileSync('chart.png', buf);
-		console.log('created chart.png');
+		const file = 'chart.png'
+		fs.writeFileSync(file, buf);
+		console.log(`created ${file}`);
+		exec(`${this.getOpenCommand()} ${file}`)
 	}
 	private error(msg: string): void {
 		console.error(msg);
 	}
+	private getOpenCommand() {
+		switch (process.platform) { 
+			case 'darwin' : return 'open';
+			case 'win32' : return 'start';
+			default : return 'xdg-open';
+		}
+	 }
 }
