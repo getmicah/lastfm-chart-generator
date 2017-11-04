@@ -1,8 +1,8 @@
 {
-  "name": "lastfm-collage-generator",
+  "name": "lastfm-chart-generator",
   "version": "1.0.0",
   "main": "lib/index.js",
-  "repository": "git@github.com:getmicah/lastfm-collage-generator.git",
+  "repository": "git@github.com:getmicah/lastfm-chart-generator.git",
   "author": "Micah Cowell <micahcowell@gmail.com>",
   "license": "MIT",
   "preferGlobal": true,

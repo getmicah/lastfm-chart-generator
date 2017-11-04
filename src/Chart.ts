@@ -25,7 +25,7 @@ interface Canvas extends HTMLCanvasElement {
 	toBuffer(): BufferSource
 }
 
-export default class CollageGenerator {
+export default class Chart {
 	user: string;
 	period: string;
 	size: number;
@@ -100,7 +100,8 @@ export default class CollageGenerator {
 	}
 	private download(canvas: Canvas) {
 		const buf = canvas.toBuffer();
-		fs.writeFileSync('collage.png', buf);
+		fs.writeFileSync('chart.png', buf);
+		console.log('created chart.png');
 	}
 	private error(msg: string): void {
 		console.error(msg);
