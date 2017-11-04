@@ -44,6 +44,7 @@ export default class Chart {
 		const req = `${api}?method=${method}&user=${this.user}&period=${this.period}&limit=${limit}&api_key=${key}&format=json`;
 		fetch(req).then(r => r.json())
 			.then(this.parse.bind(this))
+			.then(this.cache.bind(this))
 			.then(this.draw.bind(this))
 			.then(this.download.bind(this))
 			.catch(this.error.bind(this));
@@ -57,6 +58,11 @@ export default class Chart {
 			if (albums.length == 0) {
 				reject('User has no scrobbles during the given period');
 			}
+			resolve(albums);
+		});
+	}
+	private cache(albums: album[]): Promise<Image[]> {
+		return new Promise<Image[]> ((resolve, reject) => {
 			const covers: Image[] = [];
 			let queue = albums.length;
 			for (let i = 0; i < albums.length; i++) {
@@ -69,7 +75,7 @@ export default class Chart {
 						if (queue <= 0) {
 							resolve(covers);
 						}
-					}).catch(() => reject());
+					}).catch((e) => reject(e));
 				img.crossOrigin = 'anonymous';
 				img.name = albums[i].name;
 				img.artist = albums[i].artist.name;
@@ -87,6 +93,7 @@ export default class Chart {
 		let i = 0;
 		for (let y = 0; y < canvas.width; y+=dx) {
 			for (let x = 0; x < canvas.height; x+=dx) {
+				if (i == covers.length) break;
 				ctx.drawImage(covers[i], x, y);
 				ctx.font = `${fontSize}px monospace`;
 				ctx.fillStyle = 'black';
@@ -100,7 +107,7 @@ export default class Chart {
 		}
 		return canvas;
 	}
-	private download(canvas: Canvas) {
+	private download(canvas: Canvas): void {
 		const buf = canvas.toBuffer();
 		const file = 'chart.png'
 		fs.writeFileSync(file, buf);
