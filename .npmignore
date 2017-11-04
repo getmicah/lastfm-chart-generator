@@ -1,0 +1,6 @@
+.DS_Store
+npm-debug.log
+tsconfig.json
+*.png
+/node_modules
+/src

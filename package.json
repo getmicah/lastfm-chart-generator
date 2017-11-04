@@ -1,0 +1,26 @@
+{
+  "name": "lastfm-collage-generator",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "repository": "git@github.com:getmicah/lastfm-collage-generator.git",
+  "author": "Micah Cowell <micahcowell@gmail.com>",
+  "license": "MIT",
+  "preferGlobal": true,
+  "bin": {
+    "lcg": "./bin/lcg"
+  },
+  "scripts": {
+    "start": "./node_modules/.bin/tsc --watch",
+    "build": "./node_modules/.bin/tsc"
+  },
+  "devDependencies": {
+    "typescript": "^2.6.1"
+  },
+  "dependencies": {
+    "@types/node": "^8.0.47",
+    "@types/node-fetch": "^1.6.7",
+    "canvas": "^2.0.0-alpha.5",
+    "node": "^9.0.0",
+    "node-fetch": "^1.7.3"
+  }
+}
