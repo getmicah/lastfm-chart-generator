@@ -149,11 +149,11 @@ func draw(covers []albumCover, size int) (*gg.Context, error) {
 			}
 			_, h := ctx.MeasureString(covers[i].artist)
 			ctx.SetHexColor("000000")
-			ctx.DrawString(covers[i].artist, float64(x), float64(y)+h+1)
-			ctx.DrawString(covers[i].title, float64(x), float64(y)+(h*2)+3)
+			ctx.DrawString(covers[i].artist, float64(x), float64(y)+h)
+			ctx.DrawString(covers[i].title, float64(x), float64(y)+(h*2)+4)
 			ctx.SetHexColor("ffffff")
-			ctx.DrawString(covers[i].artist, float64(x)+1, float64(y)+h+2)
-			ctx.DrawString(covers[i].title, float64(x)+1, float64(y)+(h*2)+1)
+			ctx.DrawString(covers[i].artist, float64(x)+1, float64(y)+h-1)
+			ctx.DrawString(covers[i].title, float64(x)+1, float64(y)+(h*2)+3)
 			i++
 		}
 	}
