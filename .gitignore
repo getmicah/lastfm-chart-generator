@@ -1,6 +1,5 @@
 # My ignores
 .DS_Store
-*.png
 lcg
 
 # Binaries for programs and plugins
