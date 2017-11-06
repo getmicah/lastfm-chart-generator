@@ -4,7 +4,9 @@ lastfm-chart-generator
 
 **Requirements:**
 
-Make sure you have golang correctly installed on your system. You may also want to `$GOPATH/bin` to your environment's `$PATH`.
+Make sure you have golang correctly installed on your system.
+
+You may also want to `$GOPATH/bin` to your environment's `$PATH`.
 
 **Install:**
 
