@@ -38,16 +38,19 @@ type albumCover struct {
 }
 
 func chart(user string, period string, size int) {
+	fmt.Println("Loading user...")
 	albums, loadError := load(user, period, size)
 	if loadError != nil {
 		printError(loadError)
 		return
 	}
-	covers, cacheErr := cache(albums)
-	if cacheErr != nil {
-		printError(cacheErr)
+	fmt.Println("Fetching covers...")
+	covers, saveErr := save(albums)
+	if saveErr != nil {
+		printError(saveErr)
 		return
 	}
+	fmt.Println("Drawing chart...")
 	ctx, drawErr := draw(covers, size)
 	if drawErr != nil {
 		printError(drawErr)
@@ -82,7 +85,7 @@ func load(user string, period string, size int) ([]album, error) {
 	return record.Topalbums.Album, err
 }
 
-func cache(albums []album) ([]albumCover, error) {
+func save(albums []album) ([]albumCover, error) {
 	var covers []albumCover
 	for i := 0; i < len(albums); i++ {
 		url := albums[i].Image[len(albums[i].Image)-1].URL
@@ -160,11 +163,11 @@ func draw(covers []albumCover, size int) (*gg.Context, error) {
 			}
 			_, h := ctx.MeasureString(covers[i].artist)
 			ctx.SetHexColor("000000")
-			ctx.DrawString(covers[i].artist, float64(x), float64(y)+h+2)
-			ctx.DrawString(covers[i].title, float64(x), float64(y)+(h*2)+6)
+			ctx.DrawString(covers[i].artist, float64(x)+1, float64(y)+h+2)
+			ctx.DrawString(covers[i].title, float64(x)+1, float64(y)+(h*2)+6)
 			ctx.SetHexColor("ffffff")
-			ctx.DrawString(covers[i].artist, float64(x)+1, float64(y)+h+1)
-			ctx.DrawString(covers[i].title, float64(x)+1, float64(y)+(h*2)+5)
+			ctx.DrawString(covers[i].artist, float64(x)+2, float64(y)+h+1)
+			ctx.DrawString(covers[i].title, float64(x)+2, float64(y)+(h*2)+5)
 			i++
 		}
 	}
