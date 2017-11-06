@@ -14,34 +14,18 @@ import (
 )
 
 type album struct {
-	Name      string
-	Playcount string
-	MBID      string
-	URL       string
-	Artist    struct {
+	Name   string
+	Artist struct {
 		Name string
-		MBID string
-		URL  string
 	}
 	Image []struct {
-		URL  string `json:"#text"`
-		Size string
+		URL string `json:"#text"`
 	}
-	Attr struct {
-		Rank string
-	} `json:"@attr"`
 }
 
 type userTopAlbums struct {
 	Topalbums struct {
 		Album []album
-		Attr  struct {
-			User       string
-			Page       string
-			PerPage    string
-			TotalPages string
-			Total      string
-		} `json:"@attr"`
 	}
 }
 
@@ -62,10 +46,12 @@ func chart(user string, period string, size int) {
 	covers, cacheErr := cache(albums)
 	if cacheErr != nil {
 		printError(cacheErr)
+		return
 	}
 	ctx, drawErr := draw(covers, size)
 	if drawErr != nil {
 		printError(drawErr)
+		return
 	}
 	filename := "collage.png"
 	ctx.SavePNG(filename)
@@ -99,38 +85,63 @@ func load(user string, period string, size int) ([]album, error) {
 func cache(albums []album) ([]albumCover, error) {
 	var covers []albumCover
 	for i := 0; i < len(albums); i++ {
-		url := albums[i].Image[3].URL
-		client := &http.Client{Timeout: 10 * time.Second}
-		res, err := client.Get(url)
-		if err != nil {
-			return covers, err
-		}
-		defer res.Body.Close()
-		image, _, err := image.Decode(res.Body)
-		if err != nil {
-			return nil, err
-		}
-		file, err := ioutil.TempFile("/tmp", "")
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-		path := fmt.Sprintf("%s.png", file.Name())
-		if err := os.Rename(file.Name(), path); err != nil {
-			return nil, err
-		}
-		if _, err := io.Copy(file, res.Body); err != nil {
-			return nil, err
-		}
+		url := albums[i].Image[len(albums[i].Image)-1].URL
 		var c albumCover
-		c.artist = albums[i].Artist.Name
-		c.image = image
-		c.path = path
-		c.title = albums[i].Name
-		c.width = image.Bounds().Dx()
+		if url == "" {
+			c = blankCover(albums[i], 300)
+		} else {
+			var err error
+			c, err = downloadCover(albums[i], url)
+			if err != nil {
+				return nil, err
+			}
+		}
 		covers = append(covers, c)
 	}
 	return covers, nil
+}
+
+func blankCover(album album, width int) albumCover {
+	var c albumCover
+	img := image.NewGray(image.Rect(0, 0, width, width))
+	c.artist = album.Artist.Name
+	c.image = img
+	c.path = ""
+	c.title = album.Name
+	c.width = width
+	return c
+}
+
+func downloadCover(album album, url string) (albumCover, error) {
+	var c albumCover
+	client := &http.Client{Timeout: 10 * time.Second}
+	res, err := client.Get(url)
+	if err != nil {
+		return c, err
+	}
+	defer res.Body.Close()
+	image, _, err := image.Decode(res.Body)
+	if err != nil {
+		return c, err
+	}
+	file, err := ioutil.TempFile("/tmp", "")
+	if err != nil {
+		return c, err
+	}
+	defer file.Close()
+	path := fmt.Sprintf("%s.png", file.Name())
+	if err := os.Rename(file.Name(), path); err != nil {
+		return c, err
+	}
+	if _, err := io.Copy(file, res.Body); err != nil {
+		return c, err
+	}
+	c.artist = album.Artist.Name
+	c.image = image
+	c.path = path
+	c.title = album.Name
+	c.width = image.Bounds().Dx()
+	return c, nil
 }
 
 func draw(covers []albumCover, size int) (*gg.Context, error) {
@@ -149,11 +160,11 @@ func draw(covers []albumCover, size int) (*gg.Context, error) {
 			}
 			_, h := ctx.MeasureString(covers[i].artist)
 			ctx.SetHexColor("000000")
-			ctx.DrawString(covers[i].artist, float64(x), float64(y)+h)
-			ctx.DrawString(covers[i].title, float64(x), float64(y)+(h*2)+4)
+			ctx.DrawString(covers[i].artist, float64(x), float64(y)+h+2)
+			ctx.DrawString(covers[i].title, float64(x), float64(y)+(h*2)+6)
 			ctx.SetHexColor("ffffff")
-			ctx.DrawString(covers[i].artist, float64(x)+1, float64(y)+h-1)
-			ctx.DrawString(covers[i].title, float64(x)+1, float64(y)+(h*2)+3)
+			ctx.DrawString(covers[i].artist, float64(x)+1, float64(y)+h+1)
+			ctx.DrawString(covers[i].title, float64(x)+1, float64(y)+(h*2)+5)
 			i++
 		}
 	}
@@ -162,9 +173,11 @@ func draw(covers []albumCover, size int) (*gg.Context, error) {
 
 func cleanup(covers []albumCover) error {
 	for i := 0; i < len(covers); i++ {
-		err := os.Remove(covers[i].path)
-		if err != nil {
-			return err
+		if covers[i].path != "" {
+			err := os.Remove(covers[i].path)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
