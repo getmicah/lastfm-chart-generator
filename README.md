@@ -34,4 +34,4 @@ Assuming you added `$GOPATH/bin` to your `$PATH`, you should be able to run the 
     Drawing chart...
     Saved collage.png
 
-![chart](collage.png?raw=true&s=300 "Chart")
+<img src="./collage.png" width="300">
